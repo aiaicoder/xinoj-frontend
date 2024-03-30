@@ -1,18 +1,26 @@
 <template>
   <div class="home">
-    <Content msg="Welcome to Your Vue.js + TypeScript App" />
+    <MdEditor :value="Mdvalue" :handle-change="MdhandleChange"></MdEditor>
+    <CodeEditor
+      :value="Codevalue"
+      :handle-change="CodehandleChange"
+    ></CodeEditor>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import Content from "@/components/Content.vue";
+<script setup lang="ts">
+import MdEditor from "@/components/MdEditor.vue";
+import { ref } from "vue";
+import CodeEditor from "@/components/CodeEditor.vue";
 
-export default defineComponent({
-  name: "HomeView",
-  components: {
-    // eslint-disable-next-line vue/no-unused-components
-    Content,
-  },
-});
+const Mdvalue = ref();
+const Codevalue = ref();
+const CodehandleChange = (val: string) => {
+  Codevalue.value = val;
+  console.log(val);
+};
+const MdhandleChange = (val: string) => {
+  Mdvalue.value = val;
+  console.log(val);
+};
 </script>
