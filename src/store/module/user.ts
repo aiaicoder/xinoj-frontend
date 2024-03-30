@@ -1,5 +1,5 @@
 import { UserControllerService } from "../../../generated";
-import Access_Enum from "@/access/AccessEnum";
+import Access_Enum from "@/access/ACCESS_ENUM";
 
 const state = () => ({
   loginUser: {
@@ -20,20 +20,18 @@ const mutations = {
   },
 };
 
+
+
 const actions = {
-  async loginUser({ commit, state }: any) {
-    try {
-      const res = await UserControllerService.getLoginUserUsingGet();
-      if (res.code === 0) {
-        commit("setUserInfo", res.data);
-      }
-      commit("setUserInfo", {
-        ...state.loginUser,
-        UserRole: Access_Enum.UnLogin,
-      });
-    } catch (e) {
-      console.log(e);
+  async getLoginUser({ commit, state }: any) {
+    const res = await UserControllerService.getLoginUserUsingGet();
+    if (res.code === 0) {
+      commit("setUserInfo", res.data);
     }
+    commit("setUserInfo", {
+      ...state.loginUser,
+      UserRole: Access_Enum.UnLogin,
+    });
   },
 };
 

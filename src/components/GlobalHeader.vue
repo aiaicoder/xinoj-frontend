@@ -25,14 +25,20 @@
       <LoginAndRegister
         v-if="store.state.user.loginUser.userRole === Access_Enum.UnLogin"
       ></LoginAndRegister>
-      <a-avatar
-        v-if="store.state.user.loginUser.userRole !== Access_Enum.UnLogin"
-      >
-        <img
-          alt="avatar"
-          src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-        />
-      </a-avatar>
+      <a-dropdown position="bottom">
+        <a-avatar
+          v-if="store.state.user.loginUser.userRole !== Access_Enum.UnLogin"
+        >
+          <img
+            alt="avatar"
+            src="https://xinbo-1314980040.cos.ap-beijing.myqcloud.com/test%2Fimg2.jpg"
+          />
+        </a-avatar>
+        <template #content>
+          <a-doption>个人中心</a-doption>
+          <a-doption>登出</a-doption>
+        </template>
+      </a-dropdown>
     </a-col>
   </a-row>
 </template>
@@ -43,7 +49,7 @@ import { routes } from "@/router/routes";
 import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import checkAccess from "@/access/checkAccess";
-import Access_Enum from "@/access/AccessEnum";
+import Access_Enum from "@/access/ACCESS_ENUM";
 import LoginAndRegister from "@/components/LoginAndRegister.vue";
 
 //默认主页
@@ -68,7 +74,6 @@ const showRoutes = computed(() => {
     );
   });
 });
-
 const doMenuClick = (key: string) => {
   router.push(key);
 };
