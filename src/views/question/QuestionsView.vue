@@ -1,5 +1,5 @@
 <template>
-  <div id="manageQuestionView">
+  <div id="questionsView">
     <a-form :model="searchParams" layout="inline">
       <a-form-item field="title" label="名称" style="min-width: 240px">
         <a-input v-model="searchParams.title" placeholder="请输入名称" />
@@ -33,17 +33,16 @@
           </a-tag>
         </a-space>
       </template>
-      <template #content="{ record }">
-        <a-collapse :bordered="false">
-          <a-collapse-item header="详情内容" key="1">
-            <div>{{ record.content }}</div>
-          </a-collapse-item>
-        </a-collapse>
+      <template #acceptedRate="{ record }">
+        {{
+          `${
+            record.submitNum ? record.acceptedNum / record.submitNum : "0"
+          }% (${record.acceptedNum}/${record.submitNum})`
+        }}
       </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button @click="doUpdate(record)" type="primary">修改</a-button>
-          <a-button @click="doDelete(record)" status="danger">删除</a-button>
+          <a-button @click="doQuestion(record)" type="primary">做题</a-button>
         </a-space>
       </template>
     </a-table>
@@ -52,7 +51,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from "vue";
-import { QuestionControllerService } from "../../../generated";
+import { Question, QuestionControllerService } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import moment from "moment";
 import { useRouter } from "vue-router";
@@ -67,22 +66,11 @@ const searchParams = ref({
 const dataList = ref([]);
 const total = ref(0);
 
-/**
- * 初始化数据
- */
 const loadData = async () => {
   const res = await QuestionControllerService.listQuestionVoByPageUsingPost(
     searchParams.value
   );
   if (res.code === 0) {
-    res.data.records.forEach((item: any) => {
-      if (item.judgeConfig) {
-        item.judgeConfig = JSON.stringify(item.judgeConfig);
-      }
-      if (item.judgeCase) {
-        item.judgeCase = JSON.stringify(item.judgeCase);
-      }
-    });
     dataList.value = res.data.records;
     total.value = res.data.total;
   } else {
@@ -90,17 +78,8 @@ const loadData = async () => {
   }
 };
 
-onMounted(() => {
-  loadData();
-});
-const handlePageChange = (current: number) => {
-  searchParams.value = {
-    ...searchParams.value,
-    current: current,
-  };
-};
 /**
- * 处理不同难度对应不同的标签
+ * 处理不同难度标签对应不同的颜色
  * @param record
  */
 const handleColor = (record: any): string => {
@@ -115,6 +94,15 @@ const handleColor = (record: any): string => {
   }
 };
 
+onMounted(() => {
+  loadData();
+});
+const handlePageChange = (current: number) => {
+  searchParams.value = {
+    ...searchParams.value,
+    current: current,
+  };
+};
 /**
  * 监听变量的改变重新触发loadData函数
  */
@@ -124,7 +112,7 @@ watchEffect(() => {
 
 const columns = [
   {
-    title: "id",
+    title: "题号",
     dataIndex: "id",
   },
   {
@@ -132,39 +120,15 @@ const columns = [
     dataIndex: "title",
   },
   {
-    title: "题目内容",
-    dataIndex: "content",
-    slotName: "content",
-  },
-  {
     title: "标签",
     dataIndex: "tags",
     slotName: "tag",
   },
   {
-    title: "答案",
-    dataIndex: "answer",
+    title: "通过率",
+    slotName: "acceptedRate",
   },
-  {
-    title: "提交数",
-    dataIndex: "submitNum",
-  },
-  {
-    title: "通过数",
-    dataIndex: "acceptedNum",
-  },
-  {
-    title: "判题配置",
-    dataIndex: "judgeConfig",
-  },
-  {
-    title: "判题用例",
-    dataIndex: "judgeCase",
-  },
-  {
-    title: "用户id",
-    dataIndex: "userId",
-  },
+
   {
     title: "发布时间",
     dataIndex: "createTime",
@@ -179,28 +143,20 @@ const columns = [
 ];
 
 const router = useRouter();
-const doUpdate = (question: any) => {
+/**
+ * 跳转到对应的做题页
+ * @param question
+ */
+const doQuestion = (question: Question) => {
   console.log(question);
   router.push({
-    path: "/update/question",
-    query: {
-      id: question.id,
-    },
+    path: `/view/question/${question.id}`,
   });
 };
 
-const doDelete = async (question: any) => {
-  const result = await QuestionControllerService.deleteQuestionUsingPost(
-    question.id
-  );
-  if (result.code === 0) {
-    message.success("删除成功");
-    await loadData();
-  } else {
-    message.error("删除失败");
-  }
-};
-
+/**
+ * 执行搜索
+ */
 const doSubmit = async () => {
   searchParams.value = {
     ...searchParams.value,
@@ -209,4 +165,9 @@ const doSubmit = async () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+#questionsView {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+</style>
