@@ -1,5 +1,5 @@
 <template>
-  <div>404</div>
+  <div>无权限</div>
 </template>
 
 <script>

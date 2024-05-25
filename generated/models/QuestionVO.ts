@@ -2,12 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CodeTemplate } from './CodeTemplate';
 import type { JudgeCase } from './JudgeCase';
 import type { JudgeConfig } from './JudgeConfig';
 import type { UserVO } from './UserVO';
 export type QuestionVO = {
     acceptedNum?: number;
     answer?: string;
+    codeTemplate?: CodeTemplate;
     content?: string;
     createTime?: string;
     favourNum?: number;

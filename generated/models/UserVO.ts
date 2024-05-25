@@ -4,6 +4,7 @@
 /* eslint-disable */
 export type UserVO = {
     createTime?: string;
+    gender?: number;
     id?: number;
     userAvatar?: string;
     userName?: string;

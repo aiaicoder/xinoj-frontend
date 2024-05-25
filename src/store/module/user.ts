@@ -3,13 +3,19 @@ import Access_Enum from "@/access/ACCESS_ENUM";
 
 const state = () => ({
   loginUser: {
-    username: "未登录",
+    id: "",
+    userName: "未登录",
     userRole: "unLogin",
+    userAvatar: "",
+    gender: "",
+    userProfile: "",
+    createTime: "",
   },
 });
 
 const getters = {
   getUserInfo(state: { loginUser: any }) {
+    console.log(state.loginUser);
     return state.loginUser;
   },
 };
@@ -20,8 +26,6 @@ const mutations = {
   },
 };
 
-
-
 const actions = {
   async getLoginUser({ commit, state }: any) {
     const res = await UserControllerService.getLoginUserUsingGet();
@@ -31,6 +35,27 @@ const actions = {
     commit("setUserInfo", {
       ...state.loginUser,
       UserRole: Access_Enum.UnLogin,
+    });
+  },
+
+  async userLoginOut({ commit, state }: any) {
+    const res = await UserControllerService.userLogoutUsingPost();
+    if (res.code === 0) {
+      commit("setUserInfo", {
+        ...state.loginUser,
+        UserRole: Access_Enum.UnLogin,
+      });
+    }
+    commit("setUserInfo", {
+      ...state.loginUser,
+      UserRole: Access_Enum.UnLogin,
+    });
+  },
+
+  changeAvatar({ commit, state }: any, payload: any) {
+    commit("setUserInfo", {
+      ...state.loginUser,
+      userAvatar: payload,
     });
   },
 };

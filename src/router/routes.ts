@@ -7,12 +7,31 @@ import ACCESS_ENUM from "@/access/ACCESS_ENUM";
 import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
 import QuestionsView from "@/views/question/QuestionsView.vue";
 import ViewQuestionsView from "@/views/question/ViewQuestionsView.vue";
+import UserCenterView from "@/views/user/UserCenterView.vue";
+import UserLayout from "@/layouts/UserLayout.vue";
+import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "主页",
     component: QuestionsView,
+  },
+  {
+    path: "/user",
+    name: "用户",
+    component: UserLayout,
+    children: [
+      {
+        path: "/user/center",
+        name: "用户中心",
+        component: UserCenterView,
+      },
+    ],
+    meta: {
+      hideInMenu: true,
+      access: ACCESS_ENUM.User,
+    },
   },
   {
     path: "/add/question",
@@ -44,6 +63,11 @@ export const routes: Array<RouteRecordRaw> = [
     path: "/questions",
     name: "浏览题目",
     component: QuestionsView,
+  },
+  {
+    path: "/question_submit",
+    name: "浏览题目提交",
+    component: QuestionSubmitView,
   },
   {
     path: "/admin",

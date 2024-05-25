@@ -74,6 +74,9 @@ const handleSubmit = async () => {
     return;
   }
   const res = await UserControllerService.userLoginUsingPost(form);
+  if (res.data?.token) {
+    localStorage.setItem("xinToken", res.data.token);
+  }
   // 登录成功，关闭会话框
   try {
     if (res.code === 0) {

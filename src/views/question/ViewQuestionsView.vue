@@ -34,8 +34,10 @@
               </template>
             </a-card>
           </a-tab-pane>
-          <a-tab-pane key="comment" title="评论区" disabled></a-tab-pane>
-          <a-tab-pane key="answer" title="答案"> 展示无法查看答案</a-tab-pane>
+          <a-tab-pane key="comment" title="评论区">
+            <Comment :questionId="questionId" />
+          </a-tab-pane>
+          <a-tab-pane key="answer" title="答案"> 暂无答案</a-tab-pane>
         </a-tabs>
       </a-col>
       <a-col :md="12" :xs="24" style="margin-top: 40px">
@@ -58,7 +60,7 @@
         </a-form>
         <a-divider size="0" />
         <CodeEditor
-          :value="form.code as string"
+          :code="form.code"
           :language="form.language"
           :handle-change="codeHandleChange"
         />
@@ -69,19 +71,35 @@
       </a-col>
     </a-row>
   </div>
+  <a-modal
+    v-model:visible="visible"
+    @ok="handleOk"
+    @cancel="handleCancel"
+    draggable
+    :esc-to-close="false"
+    :mask-closable="false"
+  >
+    <template #title> {{ modalTitle }}</template>
+    <div v-if="judgeTime">耗时: {{ judgeTime }} ms</div>
+    <div v-if="judgeTime">内存消耗: {{ judgeTime }} ms</div>
+  </a-modal>
 </template>
 
 <script setup lang="ts">
-import { onMounted, defineProps, withDefaults, ref, watchEffect } from "vue";
 import {
-  QuestionControllerService,
-  QuestionSubmitAddRequest,
-  QuestionSubmitControllerService,
-  QuestionVO,
-} from "../../../generated";
+  onMounted,
+  defineProps,
+  withDefaults,
+  ref,
+  watchEffect,
+  watch,
+} from "vue";
+import { QuestionControllerService, QuestionVO } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import CodeEditor from "@/components/CodeEditor.vue";
 import MdView from "@/components/MdView.vue";
+import Comment from "@/components/Comment.vue";
+import { useRoute } from "vue-router";
 
 interface Props {
   id: string;
@@ -90,7 +108,11 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   id: () => "",
 });
-
+const visible = ref(false);
+const modalTitle = ref("判题中...");
+const judgeTime = ref<number>();
+let timer: ReturnType<typeof setInterval>;
+let elapsedTime = 0;
 const question = ref<QuestionVO>();
 const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoByIdUsingGet(
@@ -103,16 +125,73 @@ const loadData = async () => {
   }
 };
 
-const form = ref<QuestionSubmitAddRequest>({
+const form = ref({
   language: "java",
-  code: "",
+  code: question.value?.codeTemplate?.java,
 });
+
+watch(
+  () => form.value.language,
+  (language) => {
+    if (language === "java") {
+      form.value.code = question.value?.codeTemplate?.java;
+    } else if (language === "cpp") {
+      form.value.code = question.value?.codeTemplate?.cpp;
+    } else if (language === "python") {
+      form.value.code = question.value?.codeTemplate?.python;
+    } else if (language === "c") {
+      form.value.code = question.value?.codeTemplate?.c;
+    }
+  }
+);
 
 onMounted(() => {
   getLanguages();
   loadData();
 });
 
+/**
+ * 同步获取判题信息
+ */
+const handleOk = () => {
+  visible.value = false;
+  if (timer) {
+    clearInterval(timer);
+    modalTitle.value = "判题中...";
+    judgeTime.value = undefined;
+  }
+};
+const handleCancel = () => {
+  visible.value = false;
+  if (timer) {
+    clearInterval(timer);
+  }
+  modalTitle.value = "判题中...";
+  judgeTime.value = undefined;
+};
+
+const startTimer = (id: number) => {
+  timer = setInterval(async () => {
+    elapsedTime++;
+    // 10分钟，60秒 * 10
+    if (elapsedTime >= 600) {
+      clearInterval(timer);
+    }
+    const res = await QuestionControllerService.getJudgeResultUsingGet(id);
+    if (res.code === 0) {
+      clearInterval(timer);
+      if (res?.data?.status === 2) {
+        modalTitle.value = "判题成功";
+        judgeTime.value = res?.data?.judgeInfo?.time;
+        return;
+      }
+    }
+  }, 1000);
+};
+
+/**
+ * 获取编程语言
+ */
 const languages = ref<string[]>([]);
 
 const getLanguages = async () => {
@@ -123,6 +202,9 @@ const getLanguages = async () => {
     message.error("加载失败," + res.message);
   }
 };
+
+const route = useRoute();
+const questionId = route.params.id;
 
 watchEffect(() => {
   loadData();
@@ -139,17 +221,19 @@ const handleColor = (record: string): string => {
     return "gray";
   }
 };
+
 const codeHandleChange = (val: string) => {
   form.value = {
     ...form.value,
     code: val,
   };
 };
+
 /**
  * 执行搜索
  */
 const doSubmit = async () => {
-  const res = await QuestionSubmitControllerService.doQuestionSubmitUsingPost({
+  const res = await QuestionControllerService.doQuestionSubmitUsingPost({
     ...form.value,
     questionId: question.value?.id,
   });
@@ -158,6 +242,8 @@ const doSubmit = async () => {
   } else {
     message.error("提交失败," + res.message);
   }
+  visible.value = true;
+  startTimer(res.data);
 };
 </script>
 

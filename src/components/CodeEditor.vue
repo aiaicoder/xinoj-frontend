@@ -14,17 +14,17 @@ const codeEditor = ref();
 const codeEditorRef = ref();
 
 interface Props {
-  value: string;
+  code: any;
   handleChange: (value: string) => void;
   language?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  value: "",
+  code: "import java.util.Scanner;\n// 1:无需package\n// 2: 类名必须Main, 不可修改\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scan = new Scanner(System.in);\n        //在此输入您的代码...\n        scan.close();\n    }\n}",
   handleChange: (v: string) => {
     console.log(v);
   },
-  language: () => "Java",
+  language: () => "java",
 });
 
 /**
@@ -33,11 +33,13 @@ const props = withDefaults(defineProps<Props>(), {
 watch(
   () => props.language,
   () => {
-    monaco.editor.setModelLanguage(
-      toRaw(codeEditor.value.getModel()),
-      props.language
-    );
-    console.log(props.language);
+    if (codeEditor.value) {
+      toRaw(codeEditor?.value).getModel().setValue(props.code);
+      monaco.editor.setModelLanguage(
+        toRaw(codeEditor.value).getModel(),
+        props.language
+      );
+    }
   }
 );
 
@@ -46,7 +48,7 @@ onMounted(() => {
     return;
   }
   codeEditor.value = monaco.editor.create(codeEditorRef.value, {
-    value: props.value,
+    value: props.code,
     language: "java",
     minimap: {
       enabled: true,

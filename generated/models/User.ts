@@ -4,8 +4,10 @@
 /* eslint-disable */
 export type User = {
     createTime?: string;
+    gender?: number;
     id?: number;
     isDelete?: number;
+    token?: string;
     updateTime?: string;
     userAccount?: string;
     userAvatar?: string;
