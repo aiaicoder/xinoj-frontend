@@ -169,7 +169,7 @@ const columns = [
     title: "发布时间",
     dataIndex: "createTime",
     render: (date: moment.MomentInput) => {
-      return moment(date).format("YYYY-MM-DD hh:mm");
+      return moment(date).format("YYYY-MM-DD HH:mm");
     },
   },
   {
@@ -190,7 +190,7 @@ const doUpdate = (question: any) => {
 };
 
 const doDelete = async (question: any) => {
-  const result = await QuestionControllerService.deleteQuestionUsingPost(
+  const result = await QuestionControllerService.deleteQuestionUsingPost1(
     question.id
   );
   if (result.code === 0) {

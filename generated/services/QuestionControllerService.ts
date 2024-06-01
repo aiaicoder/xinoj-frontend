@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BaseResponse_boolean_ } from '../models/BaseResponse_boolean_';
+import type { BaseResponse_List_QuestionSubmitVO_ } from '../models/BaseResponse_List_QuestionSubmitVO_';
 import type { BaseResponse_List_string_ } from '../models/BaseResponse_List_string_';
 import type { BaseResponse_long_ } from '../models/BaseResponse_long_';
 import type { BaseResponse_Page_Question_ } from '../models/BaseResponse_Page_Question_';
@@ -284,6 +285,27 @@ export class QuestionControllerService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/question/question_submit/my/list/page/vo',
+            body: questionSubmitQueryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+    /**
+     * listMyQuestionSubmitVORecord
+     * @param questionSubmitQueryRequest questionSubmitQueryRequest
+     * @returns BaseResponse_List_QuestionSubmitVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listMyQuestionSubmitVoRecordUsingPost(
+        questionSubmitQueryRequest: QuestionSubmitQueryRequest,
+    ): CancelablePromise<BaseResponse_List_QuestionSubmitVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/question_submit/my_record/list/vo',
             body: questionSubmitQueryRequest,
             errors: {
                 401: `Unauthorized`,

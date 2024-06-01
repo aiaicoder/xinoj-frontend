@@ -1,5 +1,5 @@
 <template>
-  <Viewer :value="value" :plugins="plugins" />
+  <Viewer :value="value" :plugins="plugins"/>
 </template>
 
 <script setup lang="ts">

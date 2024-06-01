@@ -10,7 +10,7 @@
                 :column="{ xs: 1, md: 2, lg: 3 }"
               >
                 <a-descriptions-item label="时间限制">
-                  {{ question?.judgeConfig?.timeLimit ?? 0 }}
+                  {{ question?.judgeConfig?.timeLimit ?? 0 }} ms
                 </a-descriptions-item>
                 <a-descriptions-item label="内存限制">
                   {{ question?.judgeConfig?.memoryLimit ?? 0 }}
@@ -37,7 +37,12 @@
           <a-tab-pane key="comment" title="评论区">
             <Comment :questionId="questionId" />
           </a-tab-pane>
-          <a-tab-pane key="answer" title="答案"> 暂无答案</a-tab-pane>
+          <a-tab-pane key="answer" title="答案">
+            <MdView :value="question?.answer || ''" />
+          </a-tab-pane>
+          <a-tab-pane key="mySubmit" title="提交记录">
+            <SubmissionRecord />
+          </a-tab-pane>
         </a-tabs>
       </a-col>
       <a-col :md="12" :xs="24" style="margin-top: 40px">
@@ -81,7 +86,7 @@
   >
     <template #title> {{ modalTitle }}</template>
     <div v-if="judgeTime">耗时: {{ judgeTime }} ms</div>
-    <div v-if="judgeTime">内存消耗: {{ judgeTime }} ms</div>
+    <div v-if="judgeMemory">内存消耗: {{ judgeMemory }} kb</div>
   </a-modal>
 </template>
 
@@ -100,6 +105,7 @@ import CodeEditor from "@/components/CodeEditor.vue";
 import MdView from "@/components/MdView.vue";
 import Comment from "@/components/Comment.vue";
 import { useRoute } from "vue-router";
+import SubmissionRecord from "@/components/SubmissionRecord.vue";
 
 interface Props {
   id: string;
@@ -111,6 +117,7 @@ const props = withDefaults(defineProps<Props>(), {
 const visible = ref(false);
 const modalTitle = ref("判题中...");
 const judgeTime = ref<number>();
+const judgeMemory = ref<number>();
 let timer: ReturnType<typeof setInterval>;
 let elapsedTime = 0;
 const question = ref<QuestionVO>();
@@ -183,6 +190,7 @@ const startTimer = (id: number) => {
       if (res?.data?.status === 2) {
         modalTitle.value = "判题成功";
         judgeTime.value = res?.data?.judgeInfo?.time;
+        judgeMemory.value = res?.data?.judgeInfo?.memory;
         return;
       }
     }

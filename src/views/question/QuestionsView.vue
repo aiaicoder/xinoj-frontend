@@ -34,11 +34,14 @@
         </a-space>
       </template>
       <template #acceptedRate="{ record }">
-        {{
-          `${
-            record.submitNum ? record.acceptedNum / record.submitNum : "0"
-          }% (${record.acceptedNum}/${record.submitNum})`
-        }}
+        <a-progress
+          :percent="
+            record.submitNum
+              ? +(record.acceptedNum / record.submitNum).toFixed(3)
+              : 0
+          "
+          :style="{ width: '120%' }"
+        />
       </template>
       <template #optional="{ record }">
         <a-space>
@@ -133,7 +136,7 @@ const columns = [
     title: "发布时间",
     dataIndex: "createTime",
     render: (date: moment.MomentInput) => {
-      return moment(date).format("YYYY-MM-DD hh:mm");
+      return moment(date).format("YYYY-MM-DD HH:mm");
     },
   },
   {

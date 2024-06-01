@@ -5,6 +5,8 @@
 export type JudgeInfo = {
     memory?: number;
     message?: string;
+    passNum?: number;
     time?: number;
+    totalNum?: number;
 };
 

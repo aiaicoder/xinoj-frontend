@@ -3,6 +3,7 @@
     :value="value"
     :plugins="plugins"
     :mode="mode"
+    :locale="locale"
     @change="handleChange"
   />
 </template>
@@ -12,11 +13,21 @@ import gfm from "@bytemd/plugin-gfm";
 import { Editor } from "@bytemd/vue-next";
 import { defineProps, withDefaults } from "vue";
 import highlight from "@bytemd/plugin-highlight";
+import math from "@bytemd/plugin-math";
+import locale from "bytemd/locales/zh_Hans.json";
+// 引入汉化包
+import mathLocale from "@bytemd/plugin-math/locales/zh_Hans.json";
+import gfmLocale from "@bytemd/plugin-gfm/locales/zh_Hans.json";
 
 const plugins = [
-  gfm(),
+  gfm({
+    locale: gfmLocale,
+  }),
   // Add more plugins here
   highlight(),
+  math({
+    locale: mathLocale,
+  }),
 ];
 
 // 定义Props属性

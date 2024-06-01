@@ -5,11 +5,8 @@
         <a-input v-model="searchParams.questionId" placeholder="请输入" />
       </a-form-item>
       <a-form-item field="language" label="编程语言" style="min-width: 240px">
-        <a-select
-          v-model="searchParams.language"
-          :style="{ width: '320px' }"
-          placeholder="选择编程语言"
-        >
+        <a-select v-model="searchParams.language" :style="{ width: '320px' }">
+          <a-option value="">所有编程语言</a-option>
           <a-option v-for="(language, index) in codeLanguages" :key="index"
             >{{ language }}
           </a-option>
@@ -18,7 +15,7 @@
       <a-form-item>
         <a-button type="primary" @click="doSubmit">搜索</a-button>
       </a-form-item>
-      <a-checkbox v-model="showMy">我的提交</a-checkbox>
+      <a-checkbox v-model="showMy">只看我的</a-checkbox>
     </a-form>
     <a-divider size="0" />
     <a-table
@@ -34,12 +31,25 @@
       @page-change="onPageChange"
     >
       <template #judgeInfo="{ record }">
-        <a-tag :color="handleColor(record.judgeInfo.message)">
-          {{ JSON.stringify(record?.judgeInfo?.message) }}
+        <a-tag :color="handleColor(record.judgeInfo?.message)">
+          {{ record?.judgeInfo?.message }}
         </a-tag>
       </template>
+      <template #status="{ record }">
+        {{ record?.status === 2 ? "判题成功" : "判题失败" }}
+      </template>
       <template #createTime="{ record }">
-        {{ moment(record.createTime).format("YYYY-MM-DD") }}
+        {{ moment(record?.createTime).format("YYYY-MM-DD") }}
+      </template>
+      <template #optional="{ record }">
+        <a-space>
+          <a-button
+            type="primary"
+            v-if="loginUser.id === record.userId"
+            @click="toQuestionPage(record)"
+            >查看详情
+          </a-button>
+        </a-space>
       </template>
     </a-table>
   </div>
@@ -52,19 +62,20 @@ import {
   QuestionControllerService,
   QuestionSubmitQueryRequest,
 } from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
+import message from "@arco-design/web-vue/es/message";
+import { useStore } from "vuex";
 
 const tableRef = ref();
 const showMy = ref(false);
-
 const dataList = ref([]);
 const total = ref(0);
-
+const store = useStore();
+const loginUser = store.state.user.loginUser;
 const searchParams = ref<QuestionSubmitQueryRequest>({
   questionId: undefined,
-  language: undefined,
+  language: "",
   pageSize: 10,
   current: 1,
 });
@@ -72,11 +83,13 @@ const searchParams = ref<QuestionSubmitQueryRequest>({
 const loadData = async () => {
   let res;
   if (showMy.value) {
-    res = await QuestionControllerService.listMyQuestionVoByPageUsingPost({
-      ...searchParams.value,
-      sortField: "createTime",
-      sortOrder: "descend",
-    });
+    res = await QuestionControllerService.listMyQuestionSubmitVoByPageUsingPost(
+      {
+        ...searchParams.value,
+        sortField: "createTime",
+        sortOrder: "descend",
+      }
+    );
   } else {
     res = await QuestionControllerService.listQuestionSubmitVoByPageUsingPost({
       ...searchParams.value,
@@ -111,6 +124,7 @@ const columns = [
   {
     title: "提交号",
     dataIndex: "id",
+    slotName: "id",
   },
   {
     title: "编程语言",
@@ -123,6 +137,7 @@ const columns = [
   {
     title: "判题状态",
     dataIndex: "status",
+    slotName: "status",
   },
   {
     title: "题目 id",
@@ -133,13 +148,17 @@ const columns = [
     dataIndex: "userId",
   },
   {
-    title: "创建时间",
+    title: "判题时间",
     slotName: "createTime",
+  },
+  {
+    title: "操作",
+    slotName: "optional",
   },
 ];
 
 const handleColor = (record: any): string => {
-  if (record === "Accepted") {
+  if (record === "通过") {
     return "green";
   } else {
     return "red";
@@ -161,7 +180,7 @@ const router = useRouter();
  */
 const toQuestionPage = (question: Question) => {
   router.push({
-    path: `/view/question/${question.id}`,
+    path: `/submissions/detail/${question.id}`,
   });
 };
 

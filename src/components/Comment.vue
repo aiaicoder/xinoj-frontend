@@ -1,122 +1,135 @@
 <template>
-  <a-comment align="right" :avatar="loginUser.userAvatar">
-    <template #actions>
-      <a-button key="1" type="primary" @click="sendComment">评论</a-button>
-    </template>
-    <template #content>
-      <a-input v-model="comment" placeholder="这里是讨论区，不是无人区..." />
-    </template>
-  </a-comment>
-  <a-comment
-    v-for="(item, index) in questionComment"
-    :author="item.userName"
-    :content="item.content"
-    :datetime="moment(item.gmtCreate).format('YYYY-MM-DD hh:mm')"
-    :key="index"
-  >
-    <template #actions>
-      <span
-        class="action"
-        key="heart"
-        @click="onLikeChange('comment', index, 0, item.id)"
-      >
-        <span v-if="item.likeListId?.indexOf(loginUser.id) !== -1">
-          <IconHeartFill :style="{ color: '#f53f3f' }" />
-        </span>
-        <span v-else>
-          <IconHeart />
-        </span>
-        {{ item.likeCount }}
-      </span>
-      <span class="action" key="message">
-        <span>
-          <IconMessage />
-        </span>
-        {{ item.commentNum }}
-      </span>
-      <span
-        class="action"
-        key="reply"
-        v-if="loginUser.id !== item.userId"
-        @click="showReplyInput(index, 0, item)"
-      >
-        <IconMessage /> Reply
-      </span>
-      <a-comment
-        align="right"
-        :avatar="loginUser.userAvatar"
-        v-if="questionComment[index].inputShow && showReply"
-      >
-        <template #actions>
-          <a-button key="1" type="primary" @click="sendCommentReply(item)"
-            >回复
-          </a-button>
-        </template>
-        <template #content>
-          <a-input v-model="replyComment" placeholder="留下你善意的回复吧..." />
-        </template>
-      </a-comment>
-      <span
-        class="action"
-        v-if="
-          item.userId === loginUser.id ||
-          loginUser.userRole === Access_Enum.Admin
-        "
-        @click="deleteCommentById(item)"
-      >
-        <IconDelete />
-      </span>
-    </template>
-    <template #avatar>
-      <a-avatar>
-        <img alt="avatar" :src="item.userAvatar" />
-      </a-avatar>
-    </template>
+  <div>
+    <!-- 评论输入框 -->
+    <a-comment align="right" :avatar="loginUser.userAvatar">
+      <template #actions>
+        <a-button key="1" type="primary" @click="sendComment">评论</a-button>
+      </template>
+      <template #content>
+        <a-input v-model="comment" placeholder="这里是讨论区，不是无人区..." />
+      </template>
+    </a-comment>
 
-    <!--评论的开始-->
+    <!-- 评论列表 -->
     <a-comment
-      v-for="(reply, j) in item.reply"
-      :author="reply.userName"
-      :avatar="reply.userAvatar"
-      :content="reply.content"
-      :datetime="moment(reply.gmtCreate).format('YYYY-MM-DD hh:mm')"
-      :key="j"
+      v-for="(item, index) in questionComment"
+      :author="item.userName"
+      :content="item.content"
+      :datetime="moment(item.gmtCreate).format('YYYY-MM-DD hh:mm')"
+      :key="index"
     >
       <template #actions>
         <span
           class="action"
           key="heart"
-          @click="onLikeChange('reply', index, j, item.id)"
+          @click="onLikeChange('comment', index, 0, item.id)"
         >
-          <span v-if="reply.likeListId?.indexOf(loginUser.id) !== -1">
+          <span v-if="item.likeListId?.indexOf(loginUser.id) !== -1">
             <IconHeartFill :style="{ color: '#f53f3f' }" />
           </span>
           <span v-else>
             <IconHeart />
           </span>
-          {{ reply.likeCount }}
+          {{ item.likeCount }}
         </span>
         <span class="action" key="message">
           <span>
             <IconMessage />
           </span>
-          {{ reply.commentNum }}
+          {{ item.commentNum }}
+        </span>
+        <span
+          class="action"
+          v-if="loginUser.id !== item.userId"
+          @click="showReplyInput(index, 0, item)"
+        >
+          <IconMessage /> 回复
         </span>
         <span
           class="action"
           v-if="
-            reply.userId === loginUser.id ||
+            item.userId === loginUser.id ||
             loginUser.userRole === Access_Enum.Admin
           "
-          @click="deleteCommentById(reply)"
+          @click="deleteCommentById(item)"
         >
           <IconDelete />
         </span>
+        <a-comment
+          align="right"
+          :avatar="loginUser.userAvatar"
+          v-if="questionComment[index].inputShow && showReply"
+        >
+          <template #actions>
+            <a-button key="1" type="primary" @click="sendCommentReply(item)"
+              >回复
+            </a-button>
+          </template>
+          <template #content>
+            <a-input
+              v-model="replyComment"
+              placeholder="留下你善意的回复吧..."
+            />
+          </template>
+        </a-comment>
       </template>
-    </a-comment>
-  </a-comment>
-</template>
+      <template #avatar>
+        <a-avatar>
+          <img alt="avatar" :src="item.userAvatar" />
+        </a-avatar>
+      </template>
 
+      <!--二级评论的开始-->
+      <a-comment
+        v-for="(reply, j) in item.reply"
+        :author="reply.userName"
+        :avatar="reply.userAvatar"
+        :content="formattedReplyContent(reply.fromName, reply.content)"
+        :datetime="moment(reply.gmtCreate).format('YYYY-MM-DD HH:mm')"
+        :key="j"
+      >
+        <template #actions>
+          <span
+            class="action"
+            key="heart"
+            @click="onLikeChange('reply', index, j, item.id)"
+          >
+            <span v-if="reply.likeListId?.indexOf(loginUser.id) !== -1">
+              <IconHeartFill :style="{ color: '#f53f3f' }" />
+            </span>
+            <span v-else>
+              <IconHeart />
+            </span>
+            {{ reply.likeCount }}
+          </span>
+          <span class="action" key="message">
+            <span>
+              <IconMessage />
+            </span>
+            {{ reply.commentNum }}
+          </span>
+          <span
+            class="action"
+            v-if="loginUser.id !== reply.userId"
+            @click="showReplyInput(index, j, reply)"
+          >
+            <IconMessage /> 回复
+          </span>
+          <span
+            class="action"
+            v-if="
+              reply.userId === loginUser.id ||
+              loginUser.userRole === Access_Enum.Admin
+            "
+            @click="deleteCommentById(reply)"
+          >
+            <IconDelete />
+          </span>
+        </template>
+      </a-comment>
+    </a-comment>
+  </div>
+</template>
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import {
@@ -140,9 +153,7 @@ const Props = defineProps({
   },
 });
 
-const loginUser = computed(() => {
-  return store.state.user.loginUser;
-});
+const loginUser = computed(() => store.state.user.loginUser);
 
 const replyComment = ref("");
 const showReply = ref(false);
@@ -201,9 +212,9 @@ onMounted(() => {
  */
 const copyObject = (targetObj) => {
   let comment = { ...targetObj };
-  // 装换为以,号分割的字符串 [因为后台采用的是String进行存储]
+  // 转换为以,号分割的字符串 [因为后端采用的是字符串进行存储]
   comment.likeListId = "[" + comment.likeListId.join(",") + "]";
-  // 删除掉该属性，不然后台接收会报错
+  // 删除掉该属性，不然后端接收会报错
   delete comment.reply;
   return comment;
 };
@@ -221,7 +232,7 @@ const deleteCommentById = async (current) => {
   );
   if (res.code === 0) {
     message.success("删除成功");
-    // 重新获取获取评论数据
+    // 重新加载评论数据
     await loadComment();
   }
 };
@@ -240,11 +251,11 @@ const loadComment = async () => {
 };
 
 /**
- * @description 点赞
- * @param type
- * @param i
- * @param j
- * @param id
+ * 点赞或取消点赞
+ * @param {string} type 评论类型 (comment 或 reply)
+ * @param {number} i 评论索引
+ * @param {number} j 回复索引
+ * @param {number} id 评论ID
  * @returns {Promise<void>}
  */
 const onLikeChange = async (type, i, j, id) => {
@@ -255,12 +266,12 @@ const onLikeChange = async (type, i, j, id) => {
   let list = commentObje.likeListId;
 
   if (list.length === 0 || list.indexOf(loginUser.value.id) === -1) {
-    //在已经点赞的列表中未找到userId
+    // 在已经点赞的列表中未找到 userId
     commentObje.isLike = true;
     commentObje.likeCount += 1;
     commentObje.likeListId.push(loginUser.value.id);
 
-    // 将对象复制一份并且去除掉reply属性,避免后台接收数据出现异常
+    // 将对象复制一份并且去除掉 reply 属性，避免后台接收数据出现异常
     let comment = copyObject(commentObje);
     console.log("这是我之前的评论对象", comment);
     // 发送请求到后台修改点赞数量
@@ -277,8 +288,11 @@ const onLikeChange = async (type, i, j, id) => {
     commentObje.isLike = false;
     commentObje.likeCount -= 1;
     commentObje.likeListId.splice(index, 1);
-    // 将对象复制一份并且去除掉reply属性,避免后台接收数据出现异常
+
+    // 将对象复制一份并且去除掉 reply 属性，避免后台接收数据出现异常
     let comment = copyObject(commentObje);
+    console.log("这是我之前的评论对象", comment);
+    // 发送请求到后台修改点赞数量
     const res =
       await QuestionCommentsControllerService.updateQuestionCommentUsingPost(
         comment
@@ -291,7 +305,17 @@ const onLikeChange = async (type, i, j, id) => {
 };
 
 /**
- * @description 发送评论
+ * 格式化回复内容，添加红色和加粗样式
+ * @param {string} userName 被回复的用户名
+ * @param {string} content 回复的内容
+ * @returns {string} 格式化后的 HTML 字符串
+ */
+const formattedReplyContent = (userName, content) => {
+  return `回复 ${userName} : ${content}`;
+};
+
+/**
+ * 发送评论
  * @returns {Promise<void>}
  */
 const sendComment = async () => {
@@ -315,23 +339,29 @@ const sendComment = async () => {
   }
 };
 
+/**
+ * 发送回复
+ * @param {object} current 当前评论对象
+ * @returns {Promise<void>}
+ */
 const sendCommentReply = async (current) => {
   if (!replyComment.value) {
     message.warning("回复不能为空");
   } else {
     // 回复内容对象
     currentComment.value.content = replyComment.value;
-    // 得到当前被点击的评论对象，修改他的回复条数
+    // 更新当前被点击的评论对象的回复条数
     current.commentNum += 1;
     let parent = { ...current };
     parent.likeListId = "[" + parent.likeListId.join(",") + "]";
-    delete parent.reply; // 删除掉该属性，不然后台接收会报错[后台采用的是String进行存储]
+    delete parent.reply; // 删除属性，否则后端接收数据出现异常[后端采用字符串进行存储]
     delete current.reply;
+
     console.log("current=", currentComment.value);
     console.log("parent=", parent);
     const commentAddRequest = {
       currentComment: currentComment.value,
-      parent: parent,
+      parentComment: parent,
     };
     const res =
       await QuestionCommentsControllerService.addQuestionCommentWrapUsingPost(
@@ -340,6 +370,7 @@ const sendCommentReply = async (current) => {
     if (res.code === 0) {
       message.success("回复成功");
       await loadComment();
+      showReply.value = false; // 隐藏回复输入框
     }
     replyComment.value = "";
   }

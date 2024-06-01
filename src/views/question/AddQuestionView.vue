@@ -9,10 +9,28 @@
         <a-input-tag v-model="form.tags" placeholder="请选择标签" allow-clear />
       </a-form-item>
       <a-form-item field="content" label="题目内容">
-        <MdEditor :value="form.content" :handle-change="onContentChange" />
+        <MdEditor
+          @click="
+            contentZIndex = 2;
+            answerzIndex = 1;
+          "
+          :style="`z-index: ${contentZIndex}`"
+          :value="form.content"
+          mode="split"
+          :handle-change="onContentChange"
+        />
       </a-form-item>
-      <a-form-item field="answer" label="答案">
-        <MdEditor :value="form.answer" :handle-change="onAnswerChange" />
+      <a-form-item field="answer" label="参考答案">
+        <MdEditor
+          @click="
+            contentZIndex = 2;
+            answerzIndex = 1;
+          "
+          :style="`z-index: ${answerzIndex}`"
+          mode="split"
+          :value="form.answer"
+          :handle-change="onAnswerChange"
+        />
       </a-form-item>
       <a-form-item label="判题配置" :content-flex="false" :merge-props="false">
         <a-space direction="vertical" style="min-width: 480px">
@@ -22,7 +40,7 @@
               placeholder="请输入时间限制"
               class="input-demo"
               :min="1000"
-              :max="9999"
+              :max="250000"
             />
           </a-form-item>
           <a-form-item field="judgeConfig.memoryLimit" label="内存限制">
@@ -107,7 +125,8 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 // 如果页面地址包含 update，视为更新页面
 const updatePage = route.path.includes("update");
-
+const contentZIndex = ref(1);
+const answerzIndex = ref(1);
 let form = ref({
   title: "",
   tags: [],
