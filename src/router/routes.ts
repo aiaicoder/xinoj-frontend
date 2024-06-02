@@ -58,14 +58,6 @@ export const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/admin",
-    name: "管理员菜单",
-    meta: {
-      access: ACCESS_ENUM.Admin,
-    },
-    component: AdminView,
-  },
-  {
     path: "/view/question/:id",
     name: "View-question",
     props: true,

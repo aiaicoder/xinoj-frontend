@@ -43,6 +43,9 @@
           :style="{ width: '120%' }"
         />
       </template>
+      <template #createTime="{ record }">
+        {{ moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
       <template #optional="{ record }">
         <a-space>
           <a-button @click="doQuestion(record)" type="primary">做题</a-button>
@@ -134,10 +137,7 @@ const columns = [
 
   {
     title: "发布时间",
-    dataIndex: "createTime",
-    render: (date: moment.MomentInput) => {
-      return moment(date).format("YYYY-MM-DD HH:mm");
-    },
+    slotName: "createTime",
   },
   {
     title: "操作",

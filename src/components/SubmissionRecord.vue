@@ -41,6 +41,9 @@
             : `${record.judgeInfo.memory} kb`
         }}
       </template>
+      <template #createTime="{ record }">
+        {{ moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
     </a-table>
   </div>
 </template>
@@ -141,10 +144,7 @@ const columns = [
   },
   {
     title: "提交时间",
-    dataIndex: "createTime",
-    render: (date: moment.MomentInput) => {
-      return moment(date).format("YYYY-MM-DD ");
-    },
+    slotName: "createTime",
   },
 ];
 
