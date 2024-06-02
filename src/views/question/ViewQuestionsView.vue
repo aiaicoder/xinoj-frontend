@@ -41,7 +41,7 @@
             <MdView :value="question?.answer || ''" />
           </a-tab-pane>
           <a-tab-pane key="mySubmit" title="提交记录">
-            <SubmissionRecord />
+            <SubmissionRecord :shouldReload="shouldReload" />
           </a-tab-pane>
         </a-tabs>
       </a-col>
@@ -121,6 +121,7 @@ const judgeMemory = ref<number>();
 let timer: ReturnType<typeof setInterval>;
 let elapsedTime = 0;
 const question = ref<QuestionVO>();
+const shouldReload = ref(false);
 const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoByIdUsingGet(
     props.id as any
@@ -181,17 +182,22 @@ const startTimer = (id: number) => {
   timer = setInterval(async () => {
     elapsedTime++;
     // 10分钟，60秒 * 10
-    if (elapsedTime >= 600) {
+    if (elapsedTime >= 3) {
       clearInterval(timer);
     }
     const res = await QuestionControllerService.getJudgeResultUsingGet(id);
     if (res.code === 0) {
       clearInterval(timer);
+      shouldReload.value = !shouldReload.value;
       if (res?.data?.status === 2) {
         modalTitle.value = "判题成功";
         judgeTime.value = res?.data?.judgeInfo?.time;
         judgeMemory.value = res?.data?.judgeInfo?.memory;
         return;
+      } else {
+        modalTitle.value = "判题失败";
+        judgeTime.value = res?.data?.judgeInfo?.time;
+        judgeMemory.value = res?.data?.judgeInfo?.memory;
       }
     }
   }, 1000);

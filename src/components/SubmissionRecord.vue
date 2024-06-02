@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, watchEffect } from "vue";
 import message from "@arco-design/web-vue/es/message";
 import { useRoute } from "vue-router";
 import {
@@ -70,17 +70,22 @@ const searchParams = ref<QuestionSubmitQueryRequest>({
   language: selectedLanguage.value,
   userId: loginUser.id,
 });
-
+const props = defineProps({
+  shouldReload: Boolean, // 接收父组件传来的布尔值
+});
 onMounted(() => {
   loadLanguages(); // 加载可选的编程语言
   loadRecords();
 });
-
-watch(selectedLanguage, () => {
-  searchParams.value.language = selectedLanguage.value;
-  loadRecords();
-});
-
+watch(
+  () => props.shouldReload,
+  (newVal) => {
+    if (newVal) {
+      // 当 shouldReload 为 true 时重新加载记录
+      loadRecords();
+    }
+  }
+);
 const loadLanguages = async () => {
   try {
     const res = await QuestionControllerService.getAllLanguagesUsingGet();
@@ -112,7 +117,10 @@ const loadRecords = async () => {
     loading.value = false;
   }
 };
-
+watchEffect(() => {
+  searchParams.value.language = selectedLanguage.value;
+  loadRecords();
+});
 const columns = [
   {
     title: "状态",
@@ -135,7 +143,7 @@ const columns = [
     title: "提交时间",
     dataIndex: "createTime",
     render: (date: moment.MomentInput) => {
-      return moment(date).format("YYYY-MM-DD HH:mm");
+      return moment(date).format("YYYY-MM-DD ");
     },
   },
 ];
