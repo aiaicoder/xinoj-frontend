@@ -49,7 +49,7 @@
               placeholder="请输入内存限制"
               class="input-demo"
               :min="1000"
-              :max="9999"
+              :max="250000"
             />
           </a-form-item>
           <a-form-item field="judgeConfig.stackLimit" label="堆栈限制">

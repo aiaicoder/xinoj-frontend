@@ -32,7 +32,7 @@
     >
       <template #judgeInfo="{ record }">
         <a-tag :color="handleColor(record.judgeInfo?.message)">
-          {{ record?.judgeInfo?.message }}
+          {{ record?.judgeInfo?.message || "编译出错" }}
         </a-tag>
       </template>
       <template #status="{ record }">

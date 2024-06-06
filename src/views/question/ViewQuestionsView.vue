@@ -182,7 +182,7 @@ const startTimer = (id: number) => {
   timer = setInterval(async () => {
     elapsedTime++;
     // 10分钟，60秒 * 10
-    if (elapsedTime >= 3) {
+    if (elapsedTime >= 600) {
       clearInterval(timer);
     }
     const res = await QuestionControllerService.getJudgeResultUsingGet(id);
@@ -195,12 +195,12 @@ const startTimer = (id: number) => {
         judgeMemory.value = res?.data?.judgeInfo?.memory;
         return;
       } else {
-        modalTitle.value = "判题失败";
+        modalTitle.value = "解答错误or编译错误";
         judgeTime.value = res?.data?.judgeInfo?.time;
         judgeMemory.value = res?.data?.judgeInfo?.memory;
       }
     }
-  }, 1000);
+  }, 3000);
 };
 
 /**

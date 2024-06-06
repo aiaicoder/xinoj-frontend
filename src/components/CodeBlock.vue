@@ -67,14 +67,37 @@ const hideCopyIcon = () => {
 
 const copyCode = () => {
   const textToCopy = code.value?.innerText;
-  navigator.clipboard
-    .writeText(textToCopy)
-    .then(() => {
-      message.success("复制成功");
-    })
-    .catch((err) => {
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        message.success("复制成功");
+      })
+      .catch((err) => {
+        message.error("复制失败: " + err);
+      });
+  } else {
+    // Fallback method
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    textArea.style.position = "fixed"; // avoid scrolling to bottom
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      const successful = document.execCommand("copy");
+      if (successful) {
+        message.success("复制成功");
+      } else {
+        message.error("复制失败");
+      }
+    } catch (err) {
       message.error("复制失败: " + err);
-    });
+    }
+    document.body.removeChild(textArea); // Clean up
+  }
 };
 </script>
 

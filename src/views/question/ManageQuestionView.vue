@@ -190,8 +190,11 @@ const doUpdate = (question: any) => {
 };
 
 const doDelete = async (question: any) => {
+  const DeleteRequest = {
+    id: question.id,
+  };
   const result = await QuestionControllerService.deleteQuestionUsingPost1(
-    question.id
+    DeleteRequest
   );
   if (result.code === 0) {
     message.success("删除成功");

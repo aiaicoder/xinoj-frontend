@@ -209,7 +209,7 @@ onMounted(() => {
 .code-block-container {
   max-width: 1200px; /* 限制代码块最大宽度 */
   max-height: 800px;
-  width: 100%; /* 让代码块占满容器宽度 */
+  width: 800px; /* 让代码块占满容器宽度 */
   overflow-y: auto; /* 使代码块可以滚动 */
   text-align: left;
   white-space: pre-wrap; /* 折行显示 */

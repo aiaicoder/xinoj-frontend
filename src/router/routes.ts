@@ -55,6 +55,7 @@ export const routes: Array<RouteRecordRaw> = [
     component: QuestionSubmitView,
     meta: {
       title: "提交浏览",
+      access: ACCESS_ENUM.User,
     },
   },
   {
