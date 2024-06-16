@@ -1,5 +1,6 @@
 import { UserControllerService } from "../../../generated";
 import Access_Enum from "@/access/ACCESS_ENUM";
+import message from "@arco-design/web-vue/es/message";
 
 const state = () => ({
   loginUser: {
@@ -31,6 +32,8 @@ const actions = {
     const res = await UserControllerService.getLoginUserUsingGet();
     if (res.code === 0) {
       commit("setUserInfo", res.data);
+    } else {
+      message.error(res.message as string);
     }
     commit("setUserInfo", {
       ...state.loginUser,
