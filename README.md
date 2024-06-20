@@ -5,3 +5,4 @@ oj系统前端
 ``` shell
 openapi --input http://localhost:8121/api/v2/api-docs --output ./generated --client axios
 ``
+npm install 安装需要的依赖
