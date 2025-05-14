@@ -2,7 +2,7 @@
   <div id="viewQuestionView">
     <a-row :gutter="[24, 24]">
       <a-col :md="12" :xs="24">
-        <a-tabs default-active-key="question">
+        <a-tabs default-active-key="question" @change="handleTabChange">
           <a-tab-pane key="question" title="题目">
             <a-card v-if="question" :title="question.title">
               <a-descriptions
@@ -39,6 +39,14 @@
           </a-tab-pane>
           <a-tab-pane key="answer" title="答案">
             <MdView :value="question?.answer || ''" />
+          </a-tab-pane>
+          <a-tab-pane key="ai" title="智能AI问答">
+            <AiChat 
+              :question="question" 
+              :user-avatar="userInfo.userAvatar"
+              :active="activeTab === 'ai'"
+              ref="aiChatRef"
+            />
           </a-tab-pane>
           <a-tab-pane key="mySubmit" title="提交记录">
             <SubmissionRecord :shouldReload="shouldReload" />
@@ -106,7 +114,8 @@ import MdView from "@/components/MdView.vue";
 import Comment from "@/components/Comment.vue";
 import { useRoute } from "vue-router";
 import SubmissionRecord from "@/components/SubmissionRecord.vue";
-
+import AiChat from "@/components/AiChat.vue";
+import { useStore } from "vuex";
 interface Props {
   id: string;
 }
@@ -153,9 +162,26 @@ watch(
   }
 );
 
+// 从Vuex获取用户信息
+const store = useStore();
+
+// 获取用户信息
+const userInfo = ref(store.getters['user/getUserInfo'] || {
+  userAvatar: '',
+  userName: '未登录'
+});
+
 onMounted(() => {
   getLanguages();
   loadData();
+  
+  // 如果用户信息还没加载，则加载用户信息
+  if (!userInfo.value.id) {
+    store.dispatch('user/getLoginUser').then(() => {
+      userInfo.value = store.getters['user/getUserInfo'];
+      console.log('获取用户信息成功:', userInfo.value);
+    });
+  }
 });
 
 /**
@@ -258,6 +284,28 @@ const doSubmit = async () => {
   }
   visible.value = true;
   startTimer(res.data);
+};
+
+// 当前激活的选项卡
+const activeTab = ref('question');
+const aiChatRef = ref(null);
+
+// 处理选项卡变化
+const handleTabChange = (key: string) => {
+  activeTab.value = key;
+  
+  // 如果切换到AI问答选项卡，延迟一点执行自动提问（确保组件已挂载）
+  if (key === 'ai' && question.value) {
+    setTimeout(() => {
+      if (aiChatRef.value) {
+        // 使用类型断言解决类型问题
+        const aiChat = aiChatRef.value as any;
+        if (typeof aiChat.autoAskQuestion === 'function') {
+          aiChat.autoAskQuestion();
+        }
+      }
+    }, 100);
+  }
 };
 </script>
 

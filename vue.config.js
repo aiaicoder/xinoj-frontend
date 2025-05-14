@@ -6,4 +6,15 @@ module.exports = defineConfig({
   chainWebpack(config) {
     config.plugin("monaco").use(new MonacoWebpackPlugin());
   },
+  devServer: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8121",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/api": "",
+        },
+      },
+    },
+  },
 });

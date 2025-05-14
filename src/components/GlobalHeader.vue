@@ -85,18 +85,18 @@ router.afterEach((to) => {
   selectedKeys.value = [to.path];
 });
 
-const showRoutes = computed(() => {
-  return routes.filter((route) => {
-    if (route.meta?.hideInMenu) {
-      return false;
-    }
-    return checkAccess(
-      //如果直接通过复制拿到的值，不是响应式数据
-      store.state.user.loginUser,
-      route.meta?.access as string
-    );
+  const showRoutes = computed(() => {
+    return routes.filter((route) => {
+      if (route.meta?.hideInMenu) {
+        return false;
+      }
+      return checkAccess(
+        //如果直接通过复制拿到的值，不是响应式数据
+        store.state.user.loginUser,
+        route.meta?.access as string
+      );
+    });
   });
-});
 
 const doMenuClick = (key: string) => {
   router.push(key);

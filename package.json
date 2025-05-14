@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "openapi": "ts-node openapi.config.ts"
   },
   "dependencies": {
     "@babel/plugin-transform-class-static-block": "^7.24.1",
@@ -24,7 +25,8 @@
     "monaco-editor-webpack-plugin": "^7.1.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
-    "vuex": "^4.0.0"
+    "vuex": "^4.0.0",
+    "xinoj-frontend": "file:"
   },
   "devDependencies": {
     "@arco-design/web-vue": "^2.55.0",

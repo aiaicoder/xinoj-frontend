@@ -71,6 +71,7 @@ export type { UserUpdateMyRequest } from './models/UserUpdateMyRequest';
 export type { UserUpdateRequest } from './models/UserUpdateRequest';
 export type { UserVO } from './models/UserVO';
 
+export { AiControllerService } from './services/AiControllerService';
 export { FileControllerService } from './services/FileControllerService';
 export { PostControllerService } from './services/PostControllerService';
 export { PostFavourControllerService } from './services/PostFavourControllerService';
